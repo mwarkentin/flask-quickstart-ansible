@@ -1,0 +1,17 @@
+ansible==1.9.3
+awscli==1.8.6
+botocore==1.2.4
+colorama==0.3.3
+docutils==0.12
+ecdsa==0.13
+Jinja2==2.8
+jmespath==0.7.1
+MarkupSafe==0.23
+paramiko==1.15.2
+pyasn1==0.1.8
+pycrypto==2.6.1
+python-dateutil==2.4.2
+PyYAML==3.11
+rsa==3.1.4
+six==1.9.0
+wheel==0.24.0
