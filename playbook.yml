@@ -1,0 +1,37 @@
+---
+- hosts: webservers
+  remote_user: ubuntu
+  tasks:
+  - name: ensure system packages are at the latest version
+    apt: pkg={{item}} state=latest update_cache=yes cache_valid_time=3600
+    sudo: yes
+    with_items:
+    - git
+    - nginx
+    - python-pip
+  - name: ensure virtualenv is at the latest version
+    pip: name=virtualenv state=latest
+    sudo: yes
+  - name: ensure /var/www directory exists
+    file: path=/var/www state=directory owner=ubuntu group=ubuntu
+    sudo: yes
+  - name: ensure flask-quickstart repo is checked out
+    git: repo=https://github.com/mwarkentin/flask-quickstart.git dest=/var/www/flask-quickstart accept_hostkey=yes
+    sudo: no
+  - name: ensure flask-quickstart requirements are installed into flask-quickstart virtualenv
+    pip: requirements=/var/www/flask-quickstart/requirements.txt virtualenv=/var/www/flask-quickstart/venv
+  - name: ensure gunicorn daemon is started
+    command: /var/www/flask-quickstart/venv/bin/gunicorn hello:app -p hello.pid -D -w 3
+    args:
+      chdir: /var/www/flask-quickstart
+  - name: ensure default nginx configuration is removed
+    file: path=/etc/nginx/sites-enabled/default state=absent
+    sudo: yes
+  - name: ensure nginx conf is in /etc/nginx/sites-available/
+    copy: src=files/flask-quickstart.conf dest=/etc/nginx/sites-available/flask-quickstart.conf
+    sudo: yes
+  - name: ensure nginx conf is symlinked into /etc/nginx/sites-enabled
+    file: src=/etc/nginx/sites-available/flask-quickstart.conf dest=/etc/nginx/sites-enabled/flask-quickstart.conf state=link
+    sudo: yes
+  - name: ensure nginx is restarted
+    command: sudo service nginx restart
